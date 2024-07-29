@@ -45,10 +45,14 @@ public class SimpleExecutor extends BaseExecutor {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      // 获取 StatementHandler
       StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
+      // 初始化 StatementHandler
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // 执行  更新操作
       return handler.update(stmt);
     } finally {
+      // 关闭 StatementHandler
       closeStatement(stmt);
     }
   }
@@ -59,11 +63,15 @@ public class SimpleExecutor extends BaseExecutor {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      // 创建 StatementHandler 对象
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
           boundSql);
+      // 初始化 StatementHandler 对象
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // 执行 StatementHandler 读操作
       return handler.query(stmt, resultHandler);
     } finally {
+      // 关闭 StatementHandler
       closeStatement(stmt);
     }
   }
@@ -72,9 +80,13 @@ public class SimpleExecutor extends BaseExecutor {
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException {
     Configuration configuration = ms.getConfiguration();
+    // 获取 StatementHandler
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
+    // 初始化 Statement
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    // 执行 StatementHandler  ，进行读操作
     Cursor<E> cursor = handler.queryCursor(stmt);
+    // Statement 如果执行完成，则进行自动关闭
     stmt.closeOnCompletion();
     return cursor;
   }
@@ -86,8 +98,11 @@ public class SimpleExecutor extends BaseExecutor {
 
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
+    // 获取 Connection 对象
     Connection connection = getConnection(statementLog);
+    // 创建 Statement 或者 PrepareStatement
     stmt = handler.prepare(connection, transaction.getTimeout());
+    // 设置 SQL 上的参数
     handler.parameterize(stmt);
     return stmt;
   }
